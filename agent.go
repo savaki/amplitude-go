@@ -4,8 +4,8 @@ import (
 	"time"
 	"net/http"
 	"encoding/json"
-	"bytes"
 	"fmt"
+	"net/url"
 )
 
 const (
@@ -111,10 +111,11 @@ func (w *worker) Close() {
 }
 
 func (w *worker) flush(e event) {
-	body := map[string]interface{} {
-		"event": e,
-	}
-	data, _ := json.Marshal(body)
-	reader := bytes.NewReader(data)
-	http.Post(ApiEndpoint, "application/x-www-form-urlencoded", reader)
+	data, _ := json.Marshal(e)
+
+	params := url.Values{}
+	params.Set("api_key", w.apiKey)
+	params.Set("event", string(data))
+
+	http.PostForm(ApiEndpoint, params)
 }
