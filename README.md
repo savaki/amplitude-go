@@ -66,6 +66,27 @@ func main() {
 }
 ```
 
+### Non-Blocking
+
+Calls to Event will never block.  To support this, the client maintains an internal queue 
+(defaults to 100) of messages destined to be sent to Amplitude.  In cases where the queue
+becomes completely saturated, additional calls to Event will be dropped.  
+
+Use `New` if you would like to customize the size of the backlog queue.
+
+```go
+apiKey := ...
+queueSize := 1024
+client := amplitude.New(apiKey, queueSize)
+```
+
+Use `Workers` to specify the number of concurrent messages to send to Amplitude.
+
+```go
+apiKey := ...
+client := amplitude.DefaultClient(apiKey).Workers(12)
+```
+
 ### Flushing on Shutdown
 
 The call to `client.Close()` will flush and wait for pending calls to be sent to Amplitude.
