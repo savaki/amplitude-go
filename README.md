@@ -68,7 +68,7 @@ func main() {
 
 ### Non-Blocking
 
-Calls to Event will never block.  To support this, the client maintains an internal queue 
+Calls to `Event` will never block.  To support this, the client maintains an internal queue 
 (defaults to 100) of messages destined to be sent to Amplitude.  In cases where the queue
 becomes completely saturated, additional calls to Event will be dropped.  
 
