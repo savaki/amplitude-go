@@ -1,7 +1,6 @@
 package amplitude
 
 import (
-	"time"
 	"net/http"
 	"encoding/json"
 	"fmt"
@@ -17,8 +16,6 @@ type event map[string]interface{}
 
 type Client struct {
 	ApiKey     string
-	FlushAt    int
-	FlushAfter time.Duration
 	events     chan event
 	workers    []worker
 }
