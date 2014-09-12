@@ -4,12 +4,10 @@ amplitude-go
 Amplitude client for Go. For additional documentation visit https://amplitude.com/docs or view the godocs.
 
 ## Installation
----
 
 	$ go get github.com/savaki/amplitude-go
 
-##Examples
----
+## Examples
 
 ### Basic Client
 
