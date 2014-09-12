@@ -3,9 +3,3 @@
 /.idea_modules
 /*.iml
 
-# ignore environment settings
-*.env
-
-# ignore binary
-/examples/examples
-
