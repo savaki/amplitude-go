@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
+	"golang.org/x/net/context/ctxhttp"
 )
 
 const (
@@ -46,28 +47,28 @@ type Event struct {
 }
 
 type Client struct {
-	cancel    func()
-	ctx       context.Context
-	apiKey    string
-	ch        chan Event
-	flush     chan chan struct{}
-	queueSize int
-	interval  time.Duration
+	cancel        func()
+	ctx           context.Context
+	apiKey        string
+	ch            chan Event
+	flush         chan chan struct{}
+	queueSize     int
+	interval      time.Duration
+	onPublishFunc func(status int, err error)
 }
-
-type Option func(*Client)
 
 func New(apiKey string, options ...Option) *Client {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	client := &Client{
-		cancel:    cancel,
-		ctx:       ctx,
-		apiKey:    apiKey,
-		ch:        make(chan Event, DefaultQueueSize),
-		flush:     make(chan chan struct{}),
-		queueSize: DefaultQueueSize,
-		interval:  time.Second * 15,
+		cancel:        cancel,
+		ctx:           ctx,
+		apiKey:        apiKey,
+		ch:            make(chan Event, DefaultQueueSize),
+		flush:         make(chan chan struct{}),
+		queueSize:     DefaultQueueSize,
+		interval:      time.Second * 15,
+		onPublishFunc: func(status int, err error) {},
 	}
 
 	for _, opt := range options {
@@ -154,7 +155,13 @@ func (c *Client) publish(events []Event) error {
 	params.Set("api_key", c.apiKey)
 	params.Set("event", string(data))
 
-	_, err = http.PostForm(ApiEndpoint, params)
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	resp, err := ctxhttp.PostForm(ctx, http.DefaultClient, ApiEndpoint, params)
+	if resp != nil {
+		defer resp.Body.Close()
+	}
+	c.onPublishFunc(resp.StatusCode, err)
+
 	return err
 }
 
@@ -169,10 +176,4 @@ func (c *Client) Flush() {
 func (c *Client) Close() {
 	c.Flush()
 	c.cancel()
-}
-
-func Interval(v time.Duration) Option {
-	return func(c *Client) {
-		c.interval = v
-	}
 }

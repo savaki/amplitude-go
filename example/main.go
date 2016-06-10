@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/savaki/amplitude-go"
@@ -8,7 +9,9 @@ import (
 
 func main() {
 	apiKey := os.Getenv("AMPLITUDE_API_KEY")
-	client := amplitude.New(apiKey)
+	client := amplitude.New(apiKey, amplitude.OnPublishFunc(func(status int, err error) {
+		fmt.Fprintf(os.Stderr, "status: %v, err: %v\n", status, err)
+	}))
 	client.Publish(amplitude.Event{
 		UserId:    "123",
 		EventType: "sample",
