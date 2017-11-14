@@ -55,6 +55,7 @@ type Client struct {
 	queueSize     int
 	interval      time.Duration
 	onPublishFunc func(status int, err error)
+	httpClient    *http.Client
 }
 
 func New(apiKey string, options ...Option) *Client {
@@ -69,6 +70,7 @@ func New(apiKey string, options ...Option) *Client {
 		queueSize:     DefaultQueueSize,
 		interval:      time.Second * 15,
 		onPublishFunc: func(status int, err error) {},
+		httpClient:    http.DefaultClient,
 	}
 
 	for _, opt := range options {
@@ -156,7 +158,7 @@ func (c *Client) publish(events []Event) error {
 	params.Set("event", string(data))
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
-	resp, err := ctxhttp.PostForm(ctx, http.DefaultClient, ApiEndpoint, params)
+	resp, err := ctxhttp.PostForm(ctx, c.httpClient, ApiEndpoint, params)
 	if resp != nil {
 		defer resp.Body.Close()
 	}
