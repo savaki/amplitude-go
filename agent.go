@@ -157,6 +157,10 @@ func (c *Client) publish(events []Event) error {
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
 	resp, err := ctxhttp.PostForm(ctx, http.DefaultClient, ApiEndpoint, params)
+	if err != nil {
+		return err
+	}
+
 	if resp != nil {
 		defer resp.Body.Close()
 	}
