@@ -155,7 +155,8 @@ func (c *Client) publish(events []Event) error {
 	params.Set("api_key", c.apiKey)
 	params.Set("event", string(data))
 
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
 	resp, err := ctxhttp.PostForm(ctx, http.DefaultClient, ApiEndpoint, params)
 	if err != nil {
 		return err
